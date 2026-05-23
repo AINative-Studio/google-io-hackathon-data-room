@@ -284,7 +284,7 @@ class DataRoomReconstructorService:
         - Customer reference list
         
         Return JSON with:
-        - critical_gaps: [{document, priority, impact}]
+        - critical_gaps: list of documents (name, priority, impact)
         - red_flags: list of concerning absences
         - due_diligence_risk: "high", "medium", "low"
         - recommended_next_steps: list
