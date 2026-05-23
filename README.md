@@ -154,20 +154,28 @@ Also generates ready-to-import formats for:
 
 ---
 
-## UI — Next.js Frontend
+## UI — Next.js Frontend + AIKit Agent Swarm Components
 
 Live at `http://localhost:3001/hackathon`
 
-**4-tab interface built with AIKit agent swarm components:**
+The frontend is built on **[AIKit](https://www.npmjs.com/package/@ainative/ai-kit)** — AINative's open-source React component library purpose-built for visualizing multi-agent AI systems. The agent swarm UI components render each agent's real-time status, phase grouping, and parallel execution visually — making it immediately clear to any viewer that multiple agents are working simultaneously.
+
+**AIKit components used:**
+- **Agent Timeline** — renders each phase (Scout, Extract, Analyze, Fix+Export) as a live group with per-agent status indicators (running spinner → green checkmark)
+- **Execution status cards** — shows `running`, `complete`, `error` states with animated transitions via Framer Motion
+- **Swarm status panel** — live "agents running in parallel" indicator during execution, switches to "data room ready" on completion
+- **Readiness progress bar** — animated fill showing investor readiness % as it updates
+
+**4-tab interface:**
 
 | Tab | What You See |
 |-----|-------------|
-| Agent Timeline | Live phase-by-phase agent execution with status indicators |
+| Agent Timeline | AIKit swarm view: live phase-by-phase parallel agent execution |
 | Gap Analysis | Critical gaps, red flags, DD risk level, recommended next steps |
 | Gap Fixes | AI-generated documents with platform compatibility badges |
 | Investor Export | Full 63-doc data room by category + cap table + Pulley scenarios + OpenCap push |
 
-**Summary bar** always visible:
+**Summary bar** always visible after run:
 - Docs Found · Gaps Closed · DD Risk · Investor Readiness %
 
 ---
@@ -177,7 +185,7 @@ Live at `http://localhost:3001/hackathon`
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Next.js 14, TypeScript, Tailwind CSS, Framer Motion |
-| UI Components | AIKit (@ainative/ai-kit) agent swarm components |
+| Agent Swarm UI | **AIKit** (`@ainative/ai-kit`) — agent timeline, swarm status, execution cards |
 | Backend | FastAPI, Python 3.12, asyncio |
 | AI Model | Gemini Flash via AINative chat completions API |
 | Agent Framework | Custom async multi-agent orchestration with `asyncio.gather()` |
