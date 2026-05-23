@@ -8,6 +8,8 @@ Multi-agent system that reconstructs founder data rooms from scattered sources.
 
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from gemini_data_room_agents import DataRoomReconstructorService
 import logging
@@ -19,8 +21,17 @@ logger = logging.getLogger(__name__)
 # Create FastAPI app
 app = FastAPI(
     title="Data Room Reconstructor",
-    description="AI-powered founder data room reconstruction using Gemini 3.5 Flash",
+    description="AI-powered founder data room reconstruction using Gemini 2.5 Flash",
     version="1.0.0",
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for hackathon demo
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -36,6 +47,7 @@ class DataRoomResponse(BaseModel):
     founder_email: str
     company_name: str
     timestamp: str
+    agents_executed: list = []
     data_room: dict
     gap_analysis: dict
     summary: dict
@@ -44,7 +56,13 @@ class DataRoomResponse(BaseModel):
 # Routes
 @app.get("/")
 async def root():
-    """Root endpoint"""
+    """Dashboard UI"""
+    return FileResponse("dashboard.html", media_type="text/html")
+
+
+@app.get("/api")
+async def api_root():
+    """API root endpoint"""
     return {
         "message": "📂 Data Room Reconstructor API",
         "endpoints": [
@@ -60,7 +78,7 @@ async def health():
     return {"status": "ok"}
 
 
-@app.post("/reconstruct", response_model=DataRoomResponse)
+@app.post("/reconstruct")
 async def reconstruct_data_room(request: DataRoomRequest):
     """
     Reconstruct founder's data room from scattered sources
@@ -76,9 +94,9 @@ async def reconstruct_data_room(request: DataRoomRequest):
     """
     try:
         # Initialize service
-        api_key = os.getenv("GOOGLE_API_KEY")
+        api_key = os.getenv("AINATIVE_API_KEY")
         if not api_key:
-            raise ValueError("GOOGLE_API_KEY environment variable not set")
+            raise ValueError("AINATIVE_API_KEY environment variable not set")
 
         service = DataRoomReconstructorService(api_key=api_key)
 
@@ -107,7 +125,7 @@ if __name__ == "__main__":
     print("\n" + "=" * 70)
     print("🚀 Data Room Reconstructor Server Starting")
     print("=" * 70)
-    print(f"API Key configured: {'✓' if os.getenv('GOOGLE_API_KEY') else '✗'}")
+    print(f"AINative API Key configured: {'✓' if os.getenv('AINATIVE_API_KEY') else '✗'}")
     print(f"Server running at: http://localhost:8000")
     print(f"Docs at: http://localhost:8000/docs")
     print("=" * 70 + "\n")

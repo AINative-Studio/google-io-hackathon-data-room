@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Room Reconstructor - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="email"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="email"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .metric-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .info-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .info-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .red-flag {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 5px solid;
+        }
+
+        .red-flag.high {
+            background: #ffe0e0;
+            border-color: #ff6b6b;
+            color: #c92a2a;
+        }
+
+        .red-flag.medium {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #997404;
+        }
+
+        .red-flag.low {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .red-flag-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .timestamp {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 20px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📂 Data Room Reconstructor</h1>
+            <p>AI-powered founder data room reconstruction with Gemini 3.5 Flash</p>
+        </header>
+
+        <div class="form-section">
+            <form id="reconstructForm">
+                <div class="form-group">
+                    <label for="founderEmail">Founder Email</label>
+                    <input 
+                        type="email" 
+                        id="founderEmail" 
+                        name="founderEmail"
+                        value="sarah@techstartup.io"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="companyName">Company Name</label>
+                    <input 
+                        type="text" 
+                        id="companyName" 
+                        name="companyName"
+                        value="TechStartup Inc"
+                        required
+                    />
+                </div>
+
+                <button type="submit" id="submitBtn">Reconstruct Data Room</button>
+            </form>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            Analyzing data sources in parallel...
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="results" class="results-section">
+            <div class="metrics-grid" id="metricsGrid"></div>
+            
+            <div class="info-section">
+                <h2>📊 Data Room Summary</h2>
+                <div id="summaryContent"></div>
+            </div>
+
+            <div class="info-section">
+                <h2>⚠️ Red Flags & Risk Assessment</h2>
+                <div id="redFlagsContent"></div>
+            </div>
+
+            <div class="info-section">
+                <h2>📋 Data Room Structure</h2>
+                <div id="dataRoomContent"></div>
+            </div>
+
+            <div class="timestamp" id="timestamp"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/reconstruct';
+
+        document.getElementById('reconstructForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const founderEmail = document.getElementById('founderEmail').value;
+            const companyName = document.getElementById('companyName').value;
+
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('submitBtn').disabled = true;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        founder_email: founderEmail,
+                        company_name: companyName
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                const errorDiv = document.getElementById('error');
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            // Display metrics
+            const summary = data.summary || {};
+            const metrics = [
+                { label: 'Documents Found', value: summary.documents_found || 0 },
+                { label: 'Sources Covered', value: summary.sources_covered || 0 },
+                { label: 'Investor Readiness', value: summary.investor_readiness || 0 + '%' },
+                { label: 'Risk Level', value: summary.due_diligence_risk || 'Unknown' },
+                { label: 'Red Flags', value: summary.red_flags_count || 0 },
+                { label: 'Critical Gaps', value: summary.critical_gaps || 0 }
+            ];
+
+            const metricsGrid = document.getElementById('metricsGrid');
+            metricsGrid.innerHTML = metrics.map(m => `
+                <div class="metric-card">
+                    <h3>${m.label}</h3>
+                    <div class="metric-value">${m.value}</div>
+                </div>
+            `).join('');
+
+            // Display summary
+            document.getElementById('summaryContent').innerHTML = `
+                <p><strong>Founder:</strong> ${data.founder_email}</p>
+                <p><strong>Company:</strong> ${data.company_name}</p>
+                <p><strong>Total Documents Found:</strong> ${summary.documents_found || 0}</p>
+                <p><strong>Data Sources Covered:</strong> ${summary.sources_covered || 0}</p>
+                <p><strong>Due Diligence Risk:</strong> ${summary.due_diligence_risk || 'Unknown'}</p>
+            `;
+
+            // Display red flags
+            const redFlags = data.gap_analysis?.red_flags || [];
+            let redFlagsHtml = '';
+            
+            if (redFlags.length === 0) {
+                redFlagsHtml = '<p>✅ No significant red flags detected</p>';
+            } else {
+                redFlagsHtml = redFlags.map(flag => {
+                    const severity = (flag.severity || 'low').toLowerCase();
+                    return `
+                        <div class="red-flag ${severity}">
+                            <div class="red-flag-title">${flag.issue || 'Issue'}</div>
+                            <div>${flag.impact || 'Impact assessment'}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            document.getElementById('redFlagsContent').innerHTML = redFlagsHtml;
+
+            // Display data room structure
+            const dataRoom = data.data_room || {};
+            document.getElementById('dataRoomContent').innerHTML = `
+                <p><strong>Email Documents:</strong> ${dataRoom.documents?.gmail_documents?.length || 0}</p>
+                <p><strong>Drive Documents:</strong> ${dataRoom.documents?.drive_documents?.length || 0}</p>
+                <p><strong>Cap Table Data:</strong> ${Object.keys(dataRoom.documents?.carta_data || {}).length > 0 ? '✓ Available' : '✗ Not available'}</p>
+                <p><strong>Financial Data (Stripe/Ramp):</strong> ${Object.keys(dataRoom.documents?.stripe_ramp_data || {}).length > 0 ? '✓ Available' : '✗ Not available'}</p>
+            `;
+
+            // Display timestamp
+            document.getElementById('timestamp').textContent = `Generated: ${new Date(data.timestamp).toLocaleString()}`;
+
+            // Show results
+            document.getElementById('results').classList.add('show');
+        }
+    </script>
+</body>
+</html>
